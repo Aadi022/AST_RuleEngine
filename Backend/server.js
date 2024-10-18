@@ -11,13 +11,13 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Database connection
+
 connectDB();
 
 // Routes
 app.use('/api', routes);
 
-// Start the server
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

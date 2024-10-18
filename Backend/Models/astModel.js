@@ -1,35 +1,32 @@
 const mongoose = require('mongoose');
 
-// Define the Node schema
 const nodeSchema = new mongoose.Schema({
     type: {
-        type: String,  // "operator" or "operand"
+        type: String,
         required: true,
     },
     value: {
-        type: mongoose.Schema.Types.Mixed,  // Could be an operator or operand value
+        type: mongoose.Schema.Types.Mixed,
         required: true,
     },
     left: {
-        type: mongoose.Schema.Types.Mixed,  // Could be null or another node
+        type: mongoose.Schema.Types.Mixed,
         default: null,
     },
     right: {
-        type: mongoose.Schema.Types.Mixed,  // Could be null or another node
+        type: mongoose.Schema.Types.Mixed,
         default: null,
     }
-}, { _id: false });  // Disable _id generation for child nodes
+}, { _id: false });
 
-// Define the AST schema
 const astSchema = new mongoose.Schema({
-    root: nodeSchema,  // Root node of the AST
+    root: nodeSchema,
     rule: {
-        type: String,  // Input rule as a string
+        type: String,
         required: true
     }
-}, { timestamps: true });  // Enable createdAt and updatedAt timestamps
+}, { timestamps: true });
 
-// Create the AST model
 const AST = mongoose.model('AST', astSchema);
 
 module.exports = AST;

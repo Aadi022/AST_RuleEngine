@@ -2,12 +2,10 @@ const express = require('express');
 const router = express.Router();
 const AST = require('../Models/astModel.js');
 
-// Function to combine multiple ASTs
 function combineASTs(ASTs) {
     if (ASTs.length === 0) return null;
-    if (ASTs.length === 1) return ASTs[0]; // If there's only one AST, no need to merge
+    if (ASTs.length === 1) return ASTs[0];
 
-    // Start with the first AST and merge the rest into it
     let combinedAST = ASTs[0];
 
     for (let i = 1; i < ASTs.length; i++) {
@@ -17,12 +15,9 @@ function combineASTs(ASTs) {
     return combinedAST;
 }
 
-// Function to merge two ASTs dynamically
 function mergeTwoASTs(ast1, ast2) {
-    // If both nodes are operands and have the same attribute and operator, we perform relaxation
     if (ast1.type === 'operand' && ast2.type === 'operand') {
         if (ast1.value.attribute === ast2.value.attribute && ast1.value.operator === ast2.value.operator) {
-            // Relax threshold by comparing values dynamically
             const relaxedValue = relaxThreshold(ast1.value.operator, ast1.value.value, ast2.value.value);
             return {
                 type: 'operand',
@@ -34,13 +29,11 @@ function mergeTwoASTs(ast1, ast2) {
             };
         }
 
-        // If operands are identical, return one of them (no need to duplicate)
         if (JSON.stringify(ast1.value) === JSON.stringify(ast2.value)) {
             return ast1;
         }
     }
 
-    // If both nodes are operators and have the same operator, merge their children
     if (ast1.type === 'operator' && ast2.type === 'operator' && ast1.value === ast2.value) {
         return {
             type: 'operator',
@@ -50,7 +43,6 @@ function mergeTwoASTs(ast1, ast2) {
         };
     }
 
-    // If the root nodes are different or incompatible, combine them under an AND node
     return {
         type: 'operator',
         value: 'AND',
@@ -59,43 +51,35 @@ function mergeTwoASTs(ast1, ast2) {
     };
 }
 
-// Function to relax thresholds based on the operator and values
 function relaxThreshold(operator, value1, value2) {
     if (operator === '>' || operator === '>=') {
         return Math.min(parseFloat(value1), parseFloat(value2)).toString();
     } else if (operator === '<' || operator === '<=') {
         return Math.max(parseFloat(value1), parseFloat(value2)).toString();
     }
-    return value1;  // For equality or other operators
+    return value1;
 }
 
-// POST /combine_rules - Combines multiple ASTs and stores the result in the database
 router.post('/combine_rules', async (req, res) => {
-    const { rules } = req.body;  // Array of rules in req.body (e.g., [{ rule: "..." }, { rule: "..."}])
+    const { rules } = req.body;
 
     try {
-        // Convert the input rules to ASTs using buildAST
         const asts = rules.map((r) => buildAST(r.rule));
-
-        // Combine all the ASTs
         const combinedAST = combineASTs(asts);
-
-        // Store the combined AST in the database
         const createdAST = await AST.create({
             root: combinedAST,
-            rule: rules.map(r => r.rule).join(' AND ')  // Combine rules into a single string
+            rule: rules.map(r => r.rule).join(' AND ')
         });
 
-        res.status(201).json(createdAST);  // Respond with the created AST
+        res.status(201).json(createdAST);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Assuming buildAST is the same as in the first controller (or can be imported)
 function buildAST(expression) {
-    const st1 = []; // Stack for operators and parentheses
-    const st2 = []; // Stack for operands (subtrees)
+    const st1 = [];
+    const st2 = [];
 
     const tokens = expression.match(/\(|\)|AND|OR|[a-zA-Z_][a-zA-Z0-9_]*\s*[<>=!]+\s*['"]?[a-zA-Z0-9]+['"]?/g);
 

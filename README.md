@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **AST Manager Project** is a system that allows users to create, combine, and evaluate **Abstract Syntax Trees (ASTs)** based on logical rules. It is built using a **React frontend** and a **Node.js backend** with MongoDB as the database.
+The **AST Manager Project** is a system that allows users to create, combine, and evaluate **Abstract Syntax Trees (ASTs)** based on logical rules. It is built using a **React frontend** and a **Node.js backend** with MongoDB as the database. The AST structure is **converted into JSON**, which is both returned to the user and stored in the MongoDB database. The project is built using a **React frontend** and a **Node.js backend** with MongoDB for data storage.
 
 ---
 
